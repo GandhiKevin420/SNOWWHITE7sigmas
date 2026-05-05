@@ -104,69 +104,86 @@ opacity:0.9;
 <div class="subtitle">Videos sedan 19 augusti 2025</div>
 </header>
 
-<div class="section">
-    <h2>Jourtelefon schema</h2>
-    <p>Idag: <span id="current-date" style="font-weight:bold; color:#fffa00;"></span></p>
-    <p>Telefonnummer: XXX XXX XX XX</p>
+<!-- Container för att lägga saker sida vid sida -->
+<div style="display: flex; align-items: flex-start; justify-content: center; gap: 20px; flex-wrap: wrap; margin: 40px auto; max-width: 1100px;">
 
-    <!-- Scrollbar container -->
-    <div style="max-height: 300px; overflow-y: auto; border: 2px solid #ff7ac8; border-radius: 10px;">
-        <table class="table" id="schedule-table" style="margin-top:0;">
-            <thead>
-                <tr style="position: sticky; top: 0; z-index: 1;">
-                    <th>Datum (Mån-Sön)</th>
-                    <th>Vecka</th>
-                    <th>Ansvarig</th>
-                </tr>
-            </thead>
-            <tbody id="schedule-body">
-                <!-- Raderna skapas automatiskt av JavaScript -->
-            </tbody>
-        </table>
+    <!-- POST-IT LAPP -->
+    <div style="background: #ffef7d; color: #333; padding: 20px; width: 180px; min-height: 180px; transform: rotate(-3deg); box-shadow: 5px 5px 10px rgba(0,0,0,0.3); font-family: 'Comic Sans MS', cursive; position: relative; border-bottom-right-radius: 60px 5px;">
+        <div style="border-bottom: 1px solid rgba(0,0,0,0.1); margin-bottom: 10px; font-weight: bold; font-size: 1.2em;">UNDANTAG:</div>
+        <p>Tobbe tar V.24 också!</p>
+        <div style="position: absolute; top: 5px; left: 50%; transform: translateX(-50%); width: 40px; height: 10px; background: rgba(255,255,255,0.5);"></div>
     </div>
+
+    <!-- JOURSCHEMA (Huvudrutan) -->
+    <div class="section" style="margin: 0; flex: 1; min-width: 300px;">
+        <h2>Jourtelefon schema</h2>
+        <p>Idag: <span id="current-date" style="font-weight:bold; color:#fffa00;"></span></p>
+        
+        <div style="max-height: 300px; overflow-y: auto; border: 2px solid #ff7ac8; border-radius: 10px; background: rgba(0,0,0,0.2);">
+            <table class="table" id="schedule-table" style="margin-top:0;">
+                <thead>
+                    <tr style="position: sticky; top: 0; z-index: 1;">
+                        <th>Datum</th>
+                        <th>Vecka</th>
+                        <th>Ansvarig</th>
+                    </tr>
+                </thead>
+                <tbody id="schedule-body"></tbody>
+            </table>
+        </div>
+
+        <!-- KUL INFO RUTA -->
+        <div style="margin-top: 20px; padding: 15px; border: 2px dashed #fffa00; border-radius: 10px; background: rgba(255, 250, 0, 0.1);">
+            <strong style="color: #fffa00;">KUL INFO:</strong> Vi håller på att skriva en bok! 📖
+        </div>
+    </div>
+
+    <!-- GASQUE-KNAPP & RÄKNARE -->
+    <div class="section" style="margin: 0; width: 220px; border-color: #00f2ff; box-shadow: 0 0 20px #00f2ff;">
+        <h3>Ska du gasqua ikväll?</h3>
+        <button onclick="pressButton()" style="background: #00f2ff; border: none; padding: 15px; border-radius: 10px; font-weight: bold; cursor: pointer; font-family: inherit; font-size: 16px; box-shadow: 0 4px #008891; active: transform translateY(4px);">
+            YÄÄÄ BAABBYYY
+        </button>
+        <div style="margin-top: 20px;">
+            <span id="gasque-count" style="font-size: 32px; font-weight: bold; display: block;">0</span>
+            <p>taggade personer</p>
+        </div>
+        <small style="opacity: 0.7;">Nollställs kl. 04:00</small>
+    </div>
+
 </div>
 
 <script>
+    // --- SCHEMA LOGIK ---
     function generateSchedule() {
         const scheduleBody = document.getElementById('schedule-body');
         const currentDateSpan = document.getElementById('current-date');
-        
-        // Inställningar
         const staff = ["Tobbe", "Veronica", "Kenya"];
-        const startDate = new Date('2025-08-18'); // En måndag som referens för rotationen
+        const startDate = new Date('2025-08-18'); 
         const now = new Date();
         
-        // Visa dagens datum snyggt
-        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-        currentDateSpan.innerText = now.toLocaleDateString('sv-SE', options);
+        currentDateSpan.innerText = now.toLocaleDateString('sv-SE', { weekday: 'long', day: 'numeric', month: 'long' });
 
-        // Hitta måndagen i den här veckan
         let currentMonday = new Date(now);
         currentMonday.setDate(now.getDate() - (now.getDay() === 0 ? 6 : now.getDay() - 1));
         currentMonday.setHours(0, 0, 0, 0);
 
-        // Skapa rader för 52 veckor framåt
         for (let i = 0; i < 52; i++) {
             let weekStart = new Date(currentMonday);
             weekStart.setDate(currentMonday.getDate() + (i * 7));
-            
             let weekEnd = new Date(weekStart);
             weekEnd.setDate(weekStart.getDate() + 6);
 
-            // Beräkna vem som har jour baserat på rotation från startdatumet
             const weeksSinceStart = Math.floor((weekStart - startDate) / (7 * 24 * 60 * 60 * 1000));
             const personIndex = ((weeksSinceStart % staff.length) + staff.length) % staff.length;
             const person = staff[personIndex];
-
-            // Hämta veckonummer
             const weekNum = getWeekNumber(weekStart);
 
-            // Skapa raden
             const row = document.createElement('tr');
-            if (i === 0) row.style.background = "rgba(255, 250, 0, 0.2)"; // Markera denna vecka
+            if (i === 0) row.style.background = "rgba(255, 250, 0, 0.2)";
             
             row.innerHTML = `
-                <td>${weekStart.toLocaleDateString('sv-SE', {month:'short', day:'numeric'})} - ${weekEnd.toLocaleDateString('sv-SE', {month:'short', day:'numeric'})}</td>
+                <td>${weekStart.toLocaleDateString('sv-SE', {month:'short', day:'numeric'})}</td>
                 <td>v.${weekNum}</td>
                 <td style="${i === 0 ? 'font-weight:bold; color:#fffa00;' : ''}">${person}</td>
             `;
@@ -174,17 +191,50 @@ opacity:0.9;
         }
     }
 
-    // Funktion för att få korrekt veckonummer enligt ISO (svensk standard)
     function getWeekNumber(d) {
         d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
         d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
-        var yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
-        var weekNo = Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
-        return weekNo;
+        return Math.ceil((((d - new Date(Date.UTC(d.getUTCFullYear(), 0, 1))) / 86400000) + 1) / 7);
     }
 
-    // Kör funktionen när sidan laddas
-    window.onload = generateSchedule;
+    // --- GASQUE-KNAPP LOGIK ---
+    function pressButton() {
+        let count = parseInt(localStorage.getItem('gasqueCount') || 0);
+        count++;
+        localStorage.setItem('gasqueCount', count);
+        updateDisplay();
+    }
+
+    function updateDisplay() {
+        const count = localStorage.getItem('gasqueCount') || 0;
+        document.getElementById('gasque-count').innerText = count;
+    }
+
+    function checkReset() {
+        const lastReset = localStorage.getItem('lastResetDate');
+        const now = new Date();
+        
+        // Skapa en tidpunkt för "idag kl 04:00"
+        let resetTime = new Date();
+        resetTime.setHours(4, 0, 0, 0);
+
+        // Om vi passerat 04:00 idag men inte har nollställt än
+        const currentString = now.toDateString() + (now.getHours() >= 4);
+        
+        if (lastReset !== currentString) {
+            localStorage.setItem('gasqueCount', 0);
+            localStorage.setItem('lastResetDate', currentString);
+            updateDisplay();
+        }
+    }
+
+    window.onload = () => {
+        generateSchedule();
+        checkReset();
+        updateDisplay();
+        // Kolla var 10:e sekund om vi ska nollställa (om fliken är öppen över kl 04:00)
+        setInterval(checkReset, 10000);
+    };
 </script>
 
 <div class="section">
