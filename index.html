@@ -105,71 +105,95 @@ opacity:0.9;
 </header>
 
 <div class="section">
-<h2>Jourtelefon schema</h2>
-<p>Telefonnummer: XXX XXX XX XX</p>
+    <h2>Jourtelefon schema</h2>
+    <p>Idag: <span id="current-date" style="font-weight:bold; color:#fffa00;"></span></p>
+    <p>Telefonnummer: XXX XXX XX XX</p>
 
-<table class="table">
-<tr>
-<th>Vecka</th>
-<th>Ansvarig</th>
-</tr>
-<tr>
-<td>v.1</td>
-<td>Tobbe</td>
-</tr>
-<tr>
-<td>v.2</td>
-<td>Veronica</td>
-</tr>
-<tr>
-<td>v.3</td>
-<td>Kenya</td>
-</tr>
-<tr>
-<td>v.4</td>
-<td>Tobbe</td>
-</tr>
-<tr>
-<td>v.5</td>
-<td>Veronica</td>
-</tr>
-<tr>
-<td>v.6</td>
-<td>Kenya</td>
-</tr>
-</table>
+    <!-- Scrollbar container -->
+    <div style="max-height: 300px; overflow-y: auto; border: 2px solid #ff7ac8; border-radius: 10px;">
+        <table class="table" id="schedule-table" style="margin-top:0;">
+            <thead>
+                <tr style="position: sticky; top: 0; z-index: 1;">
+                    <th>Datum (Mån-Sön)</th>
+                    <th>Vecka</th>
+                    <th>Ansvarig</th>
+                </tr>
+            </thead>
+            <tbody id="schedule-body">
+                <!-- Raderna skapas automatiskt av JavaScript -->
+            </tbody>
+        </table>
+    </div>
 </div>
 
-<div class="section">
-<h2>Status</h2>
-<div class="status">
+<script>
+    function generateSchedule() {
+        const scheduleBody = document.getElementById('schedule-body');
+        const currentDateSpan = document.getElementById('current-date');
+        
+        // Inställningar
+        const staff = ["Tobbe", "Veronica", "Kenya"];
+        const startDate = new Date('2025-08-18'); // En måndag som referens för rotationen
+        const now = new Date();
+        
+        // Visa dagens datum snyggt
+        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        currentDateSpan.innerText = now.toLocaleDateString('sv-SE', options);
 
-<div class="card">
-<strong>Tobbe</strong>
-<p>Status: Singel</p>
-</div>
+        // Hitta måndagen i den här veckan
+        let currentMonday = new Date(now);
+        currentMonday.setDate(now.getDate() - (now.getDay() === 0 ? 6 : now.getDay() - 1));
+        currentMonday.setHours(0, 0, 0, 0);
 
-<div class="card">
-<strong>Veronica</strong>
-<p>Status: Singel</p>
-</div>
+        // Skapa rader för 52 veckor framåt
+        for (let i = 0; i < 52; i++) {
+            let weekStart = new Date(currentMonday);
+            weekStart.setDate(currentMonday.getDate() + (i * 7));
+            
+            let weekEnd = new Date(weekStart);
+            weekEnd.setDate(weekStart.getDate() + 6);
 
-<div class="card">
-<strong>Kenya</strong>
-<p>Status: Singel</p>
-</div>
+            // Beräkna vem som har jour baserat på rotation från startdatumet
+            const weeksSinceStart = Math.floor((weekStart - startDate) / (7 * 24 * 60 * 60 * 1000));
+            const personIndex = ((weeksSinceStart % staff.length) + staff.length) % staff.length;
+            const person = staff[personIndex];
 
-</div>
-</div>
+            // Hämta veckonummer
+            const weekNum = getWeekNumber(weekStart);
+
+            // Skapa raden
+            const row = document.createElement('tr');
+            if (i === 0) row.style.background = "rgba(255, 250, 0, 0.2)"; // Markera denna vecka
+            
+            row.innerHTML = `
+                <td>${weekStart.toLocaleDateString('sv-SE', {month:'short', day:'numeric'})} - ${weekEnd.toLocaleDateString('sv-SE', {month:'short', day:'numeric'})}</td>
+                <td>v.${weekNum}</td>
+                <td style="${i === 0 ? 'font-weight:bold; color:#fffa00;' : ''}">${person}</td>
+            `;
+            scheduleBody.appendChild(row);
+        }
+    }
+
+    // Funktion för att få korrekt veckonummer enligt ISO (svensk standard)
+    function getWeekNumber(d) {
+        d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+        d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
+        var yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+        var weekNo = Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+        return weekNo;
+    }
+
+    // Kör funktionen när sidan laddas
+    window.onload = generateSchedule;
+</script>
 
 <div class="section">
 <h2>Snowwhite7sigmas</h2>
 <p>Följ oss på TikTok:</p>
 <p>
-<a href="https://www.tiktok.com" target="_blank">Snowwhite7sigmas TikTok</a>
+<a href="https://www.tiktok.com/@snowwhite7sigmas" target="_blank">Snowwhite7sigmas TikTok</a>
 </p>
 
-<img src="bild.jpg" alt="Snowwhite7sigmas crew">
 
 <div class="quote">
 "Jag gillar tjejer, men jag är lite rädd för mens" – Tobbe
